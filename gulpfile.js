@@ -14,6 +14,10 @@ const concat = require('gulp-concat');
 const rename = require('gulp-rename');
 // 載入 Sass 套件
 const sass = require('gulp-sass')(require('sass'));
+// 載入 gulp-postcss 套件
+const postcss = require('gulp-postcss');
+// 載入 autoprefixer 套件
+const autoprefixer = require('autoprefixer');
 // 瀏覽器同步顯示套件
 const browserSync = require('browser-sync').create();
 // 檔案監聽套件
@@ -59,7 +63,13 @@ function jsTask() {
 function sassTask() {
   return src('./src/assets/style/**/*.scss') // SCSS 檔案路徑
     .pipe(sass().on('error', sass.logError)) // 編譯, 如果有錯必須把 Error 輸出
+    .pipe(postcss([autoprefixer()])) // 將編譯完成的 CSS 做 PostCSS 處理
     .pipe(dest('./dist/css')); // 輸出
+}
+
+// 熱更新dist底下文件
+function reload() {
+  return src('./dist/**/*').pipe(browserSync.stream());
 }
 
 // 瀏覽器同步任務
@@ -75,8 +85,16 @@ function browserTask() {
 
 // 檔案監聽套件
 function watchTask() {
-  watch('./src/**/*.html', series(cleanTask, copyFileTask, jsTask, sassTask));
-  watch('./src/assets/style/**/*.scss', series(cleanTask, copyFileTask, jsTask, sassTask));
+  watch('./src/**/*.html', series(cleanTask, copyFileTask, jsTask, sassTask, reload));
+  watch('./src/assets/js/**/*.js', series(cleanTask, copyFileTask, jsTask, sassTask, reload));
+  watch('./src/assets/style/**/*.scss', series(cleanTask, copyFileTask, jsTask, sassTask, reload));
 }
+
+exports.clean = cleanTask;
+exports.copy = copyFileTask;
+exports.js = jsTask;
+exports.sass = sassTask;
+exports.sync = browserTask;
+exports.watch = watchTask;
 
 exports.default = series(cleanTask, copyFileTask, jsTask, sassTask, parallel(browserTask, watchTask));

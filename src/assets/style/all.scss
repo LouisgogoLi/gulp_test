@@ -1,6 +1,18 @@
-$Primary: #E7E7;
+$Primary: #e7e7;
+$color-primary: blue;
 
 .title {
   color: $Primary;
   font-size: 16px;
+}
+
+.d-flex {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-flow: row wrap;
+}
+
+.text-primary {
+  color: $color-primary;
 }
